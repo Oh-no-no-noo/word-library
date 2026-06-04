@@ -1,445 +1,462 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Selen's Word Library</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { min-height: 100vh; background: #faf7f2; font-family: 'Georgia', serif; color: #2a2118; }
-
-.header {
-  background: #2a2118; color: #faf7f2;
-  padding: 36px 32px 28px;
-  position: sticky; top: 0; z-index: 100;
-  border-bottom: 3px solid #c9a96e;
-}
-.header h1 {
-  font-family: 'Playfair Display', serif;
-  font-size: clamp(22px, 4vw, 32px);
-  font-weight: 700; letter-spacing: 0.02em; margin-bottom: 4px;
-}
-.header .subtitle {
-  font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 300;
-  letter-spacing: 0.12em; text-transform: uppercase; color: #c9a96e; margin-bottom: 20px;
-}
-.controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-#search-input {
-  flex: 1; min-width: 180px;
-  background: rgba(255,255,255,0.08); border: 1px solid rgba(201,169,110,0.4);
-  color: #faf7f2; font-family: 'Lato', sans-serif; font-size: 14px;
-  padding: 9px 14px; border-radius: 3px; outline: none; transition: border-color 0.2s;
-}
-#search-input::placeholder { color: rgba(250,247,242,0.35); }
-#search-input:focus { border-color: #c9a96e; }
-.add-btn {
-  background: #c9a96e; color: #2a2118; border: none;
-  font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700;
-  letter-spacing: 0.1em; text-transform: uppercase;
-  padding: 9px 20px; border-radius: 3px; cursor: pointer;
-  transition: background 0.2s, transform 0.1s; white-space: nowrap;
-}
-.add-btn:hover { background: #e0c080; transform: translateY(-1px); }
-
-.alpha-bar {
-  display: flex; flex-wrap: wrap; gap: 2px;
-  padding: 10px 32px; background: #f0ece3; border-bottom: 1px solid #ddd5c2;
-}
-.alpha-lnk {
-  font-family: 'Lato', sans-serif; font-size: 11px; font-weight: 700;
-  letter-spacing: 0.08em; padding: 3px 6px; border-radius: 2px;
-  cursor: pointer; color: #8a7560; transition: all 0.15s;
-  border: 1px solid transparent; text-decoration: none;
-}
-.alpha-lnk.has-entries { color: #2a2118; }
-.alpha-lnk.has-entries:hover { background: #c9a96e33; border-color: #c9a96e; }
-.alpha-lnk.no-entries { opacity: 0.3; cursor: default; }
-
-.body { max-width: 720px; margin: 0 auto; padding: 32px 24px 80px; }
-.count {
-  font-family: 'Lato', sans-serif; font-size: 11px;
-  letter-spacing: 0.12em; text-transform: uppercase; color: #8a7560; margin-bottom: 28px;
-}
-.empty {
-  text-align: center; padding: 64px 24px; color: #8a7560;
-  font-family: 'Playfair Display', serif; font-style: italic; font-size: 18px;
-}
-
-.letter-group { margin-bottom: 32px; }
-.letter-heading {
-  font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700;
-  color: #c9a96e; border-bottom: 1px solid #ddd5c2; padding-bottom: 6px; margin-bottom: 12px;
-}
-
-.card {
-  border: 1px solid #ddd5c2; border-radius: 4px; margin-bottom: 8px;
-  background: #fff; transition: box-shadow 0.2s, border-color 0.2s; overflow: hidden;
-}
-.card:hover { box-shadow: 0 2px 12px rgba(42,33,24,0.08); border-color: #c9a96e; }
-.card.just-added {
-  border-color: #c9a96e; box-shadow: 0 0 0 3px rgba(201,169,110,0.25);
-  animation: pop-in 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
-}
-@keyframes pop-in {
-  0% { transform: scale(0.97); opacity: 0.6; }
-  100% { transform: scale(1); opacity: 1; }
-}
-
-.card-header {
-  display: flex; align-items: center; padding: 14px 18px;
-  cursor: pointer; user-select: none; gap: 10px;
-}
-.card-word { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; flex: 1; }
-.card-date { font-family: 'Lato', sans-serif; font-size: 11px; color: #b0a090; letter-spacing: 0.05em; }
-.card-chevron { font-size: 11px; color: #c9a96e; transition: transform 0.2s; margin-left: 4px; }
-.card-chevron.open { transform: rotate(180deg); }
-
-.card-body {
-  padding: 0 18px 16px; border-top: 1px solid #f0ece3;
-  animation: slide-down 0.2s ease;
-}
-@keyframes slide-down {
-  from { opacity: 0; transform: translateY(-6px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.card-label {
-  font-family: 'Lato', sans-serif; font-size: 10px; font-weight: 700;
-  letter-spacing: 0.14em; text-transform: uppercase; color: #c9a96e;
-  margin-top: 14px; margin-bottom: 4px;
-}
-.card-explanation { font-family: 'Georgia', serif; font-size: 15px; line-height: 1.65; color: #3a3028; }
-.card-synonyms { font-family: 'Lato', sans-serif; font-size: 13px; color: #7a6850; font-style: italic; }
-.card-actions { margin-top: 14px; display: flex; justify-content: flex-end; }
-.del-btn {
-  background: none; border: 1px solid #e0d5c5; color: #b09070;
-  font-family: 'Lato', sans-serif; font-size: 11px; letter-spacing: 0.08em;
-  text-transform: uppercase; padding: 5px 12px; border-radius: 3px; cursor: pointer; transition: all 0.15s;
-}
-.del-btn:hover { border-color: #c0402a; color: #c0402a; }
-
-/* MODAL */
-.overlay {
-  position: fixed; inset: 0; background: rgba(42,33,24,0.6);
-  z-index: 200; display: flex; align-items: center; justify-content: center;
-  padding: 24px; animation: fade-in 0.2s ease;
-}
-@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
-.modal {
-  background: #faf7f2; border: 1px solid #ddd5c2; border-radius: 6px;
-  width: 100%; max-width: 480px; padding: 32px;
-  animation: slide-up 0.25s cubic-bezier(0.175,0.885,0.32,1.275);
-  box-shadow: 0 20px 60px rgba(42,33,24,0.3);
-}
-@keyframes slide-up {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-.modal h2 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; margin-bottom: 24px; }
-.field { margin-bottom: 16px; }
-.field label {
-  display: block; font-family: 'Lato', sans-serif; font-size: 11px; font-weight: 700;
-  letter-spacing: 0.12em; text-transform: uppercase; color: #8a7560; margin-bottom: 6px;
-}
-.field input, .field textarea {
-  width: 100%; border: 1px solid #ddd5c2; background: #fff;
-  font-family: 'Georgia', serif; font-size: 15px; color: #2a2118;
-  padding: 10px 12px; border-radius: 3px; outline: none; transition: border-color 0.2s;
-}
-.field input:focus, .field textarea:focus { border-color: #c9a96e; }
-.field input.error, .field textarea.error { border-color: #c0402a; }
-.field textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
-.error-msg { font-family: 'Lato', sans-serif; font-size: 12px; color: #c0402a; margin-top: 4px; }
-.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
-.cancel-btn {
-  background: none; border: 1px solid #ddd5c2; color: #8a7560;
-  font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700;
-  letter-spacing: 0.08em; text-transform: uppercase; padding: 10px 18px;
-  border-radius: 3px; cursor: pointer; transition: all 0.15s;
-}
-.cancel-btn:hover { border-color: #8a7560; color: #2a2118; }
-.save-btn {
-  background: #2a2118; color: #faf7f2; border: none;
-  font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700;
-  letter-spacing: 0.1em; text-transform: uppercase; padding: 10px 24px;
-  border-radius: 3px; cursor: pointer; transition: background 0.2s;
-}
-.save-btn:hover { background: #c9a96e; color: #2a2118; }
-
-/* CONFIRM */
-.confirm-overlay {
-  position: fixed; inset: 0; background: rgba(42,33,24,0.5);
-  z-index: 300; display: flex; align-items: center; justify-content: center; padding: 24px;
-}
-.confirm-box {
-  background: #fff; border: 1px solid #ddd5c2; border-radius: 6px;
-  padding: 28px; max-width: 340px; width: 100%; text-align: center;
-  box-shadow: 0 10px 40px rgba(42,33,24,0.2);
-}
-.confirm-box h3 { font-family: 'Playfair Display', serif; font-size: 18px; margin-bottom: 8px; }
-.confirm-box p { font-family: 'Lato', sans-serif; font-size: 13px; color: #8a7560; margin-bottom: 20px; }
-.confirm-actions { display: flex; gap: 10px; justify-content: center; }
-.confirm-no {
-  background: none; border: 1px solid #ddd5c2; color: #8a7560;
-  font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700;
-  letter-spacing: 0.08em; text-transform: uppercase; padding: 8px 18px; border-radius: 3px; cursor: pointer;
-}
-.confirm-yes {
-  background: #c0402a; color: #fff; border: none;
-  font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700;
-  letter-spacing: 0.08em; text-transform: uppercase; padding: 8px 18px; border-radius: 3px; cursor: pointer;
-}
-.hidden { display: none; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Forgotten Lexicon</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+    }
+    html{
+      scroll-behavior:smooth;
+    }
+    body{
+      background:#f6f4f1;
+      color:#232323;
+      font-family:'Cormorant Garamond', serif;
+      line-height:1.5;
+    }
+    .container{
+      width:min(1100px, 92%);
+      margin:auto;
+    }
+    /* ---------------- HERO ---------------- */
+    .hero{
+      text-align:center;
+      padding-top:110px;
+      margin-bottom:90px;
+    }
+    .hero h1{
+      font-size:5rem;
+      font-weight:600;
+      letter-spacing:-2px;
+      margin-bottom:18px;
+    }
+    .hero p{
+      font-size:1.6rem;
+      color:#666;
+      max-width:760px;
+      margin:auto;
+    }
+    /* ---------------- SEARCH ---------------- */
+    .search-wrapper{
+      margin-bottom:70px;
+    }
+    .search-input{
+      width:100%;
+      padding:18px 24px;
+      border:none;
+      border-bottom:1px solid rgba(0,0,0,0.12);
+      background:transparent;
+      font-size:1.1rem;
+      font-family:'Inter', sans-serif;
+      outline:none;
+    }
+    .search-input:focus{
+      border-color:#5b6cff;
+    }
+    /* ---------------- FORM ---------------- */
+    .form-section{
+      margin-bottom:90px;
+      background:rgba(255,255,255,0.55);
+      border:1px solid rgba(0,0,0,0.06);
+      padding:38px;
+      border-radius:18px;
+      backdrop-filter:blur(10px);
+    }
+    .form-section h2{
+      font-size:2.5rem;
+      margin-bottom:30px;
+    }
+    .form-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:22px;
+    }
+    .full{
+      grid-column:1 / -1;
+    }
+    label{
+      display:block;
+      margin-bottom:10px;
+      font-size:1.05rem;
+      color:#666;
+      font-family:'Inter', sans-serif;
+    }
+    input,
+    textarea{
+      width:100%;
+      background:transparent;
+      border:none;
+      border-bottom:1px solid rgba(0,0,0,0.16);
+      padding:14px 4px;
+      font-size:1.1rem;
+      font-family:'Inter', sans-serif;
+      outline:none;
+      color:#222;
+    }
+    textarea{
+      min-height:100px;
+      resize:vertical;
+    }
+    input:focus,
+    textarea:focus{
+      border-color:#5b6cff;
+    }
+    .submit-btn{
+      margin-top:28px;
+      border:none;
+      background:#5b6cff;
+      color:white;
+      padding:14px 24px;
+      border-radius:12px;
+      font-size:1rem;
+      cursor:pointer;
+      font-family:'Inter', sans-serif;
+      transition:0.2s ease;
+    }
+    .submit-btn:hover{
+      transform:translateY(-1px);
+      opacity:0.95;
+    }
+    /* ---------------- ALPHABET NAV ---------------- */
+    .alphabet-nav{
+      position:fixed;
+      right:22px;
+      top:50%;
+      transform:translateY(-50%);
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      z-index:10;
+    }
+    .alphabet-nav a{
+      text-decoration:none;
+      color:#9c9c9c;
+      font-family:'Inter', sans-serif;
+      font-size:0.8rem;
+      transition:0.15s ease;
+    }
+    .alphabet-nav a:hover{
+      color:#5b6cff;
+      transform:translateX(-2px);
+    }
+    /* ---------------- LIBRARY ---------------- */
+    .library-header{
+      margin-bottom:50px;
+    }
+    .library-header h2{
+      font-size:3rem;
+      margin-bottom:10px;
+    }
+    .library-header p{
+      font-size:1.3rem;
+      color:#666;
+    }
+    .letter-section{
+      margin-bottom:70px;
+    }
+    .letter{
+      font-size:4.5rem;
+      color:#d7d7d7;
+      border-bottom:1px solid rgba(0,0,0,0.08);
+      margin-bottom:20px;
+    }
+    /* ---------------- CARD ---------------- */
+    .word-card{
+      display:grid;
+      grid-template-columns:240px 1fr auto;
+      gap:40px;
+      padding:28px 0;
+      border-bottom:1px solid rgba(0,0,0,0.08);
+    }
+    .word-title{
+      color:#5b6cff;
+      font-size:2rem;
+      font-weight:600;
+    }
+    .meta-title{
+      text-transform:uppercase;
+      letter-spacing:1px;
+      font-size:0.82rem;
+      color:#7f7f7f;
+      margin-bottom:6px;
+      font-family:'Inter', sans-serif;
+    }
+    .word-details p{
+      margin-bottom:18px;
+      font-size:1.14rem;
+    }
+    .synonyms{
+      font-style:italic;
+      color:#555;
+    }
+    .delete-btn{
+      border:none;
+      background:transparent;
+      color:#b3b3b3;
+      cursor:pointer;
+      font-size:1.4rem;
+      transition:0.2s ease;
+    }
+    .delete-btn:hover{
+      color:#d64e4e;
+    }
+    /* ---------------- EMPTY ---------------- */
+    .empty{
+      padding:50px 0;
+      color:#888;
+      font-size:1.3rem;
+    }
+    /* ---------------- MOBILE ---------------- */
+    @media(max-width:900px){
+      .hero h1{
+        font-size:3.5rem;
+      }
+      .hero p{
+        font-size:1.25rem;
+      }
+      .form-grid{
+        grid-template-columns:1fr;
+      }
+      .word-card{
+        grid-template-columns:1fr;
+        gap:14px;
+      }
+      .alphabet-nav{
+        display:none;
+      }
+    }
+  </style>
 </head>
 <body>
-
-<header class="header">
-  <h1>My Word Library</h1>
-  <p class="subtitle">A personal lexicon of curious &amp; beautiful words</p>
-  <div class="controls">
-    <input id="search-input" type="text" placeholder="Search words, meanings, synonyms…" oninput="renderAll()" />
-    <button class="add-btn" onclick="openForm()">+ Add Word</button>
-  </div>
-</header>
-
-<div class="alpha-bar" id="alpha-bar"></div>
-
-<main class="body">
-  <p class="count" id="count-label"></p>
-  <div id="word-list"></div>
-</main>
-
-<!-- ADD FORM -->
-<div class="overlay hidden" id="form-overlay" onclick="overlayClick(event)">
-  <div class="modal">
-    <h2>Add a new word</h2>
-    <div class="field">
-      <label>Word *</label>
-      <input type="text" id="f-word" placeholder="e.g. Ephemeral" oninput="clearErr('err-word')" />
-      <div class="error-msg hidden" id="err-word"></div>
+  <!-- ALPHABET NAV -->
+  <div class="alphabet-nav" id="alphabetNav"></div>
+  <div class="container">
+<!-- HERO -->
+<section class="hero">
+  <h1>Forgotten Lexicon</h1>
+  <p>
+    A living archive of obscure, historical, atmospheric,
+    and culturally resonant words.
+  </p>
+</section>
+<!-- SEARCH -->
+<section class="search-wrapper">
+  <input
+    type="text"
+    class="search-input"
+    id="searchInput"
+    placeholder="Search words, meanings, etymologies, synonyms..."
+  >
+</section>
+<!-- FORM -->
+<section class="form-section">
+  <h2>Add Entry</h2>
+  <div class="form-grid">
+    <div>
+      <label>Word</label>
+      <input type="text" id="wordInput" placeholder="Wasenmeister">
     </div>
-    <div class="field">
-      <label>Explanation *</label>
-      <textarea id="f-explanation" placeholder="What does it mean? Where might you use it?" oninput="clearErr('err-explanation')"></textarea>
-      <div class="error-msg hidden" id="err-explanation"></div>
+    <div>
+      <label>Synonyms</label>
+      <input type="text" id="synonymsInput" placeholder="knackerman, executioner">
     </div>
-    <div class="field">
-      <label>Synonyms <span style="font-weight:300;text-transform:none;letter-spacing:0">(optional)</span></label>
-      <input type="text" id="f-synonyms" placeholder="e.g. fleeting, transient, momentary" />
+    <div class="full">
+      <label>Meaning</label>
+      <textarea
+        id="meaningInput"
+        placeholder="Historical occupation responsible for processing animal carcasses..."
+      ></textarea>
     </div>
-    <div class="modal-actions">
-      <button class="cancel-btn" onclick="closeForm()">Cancel</button>
-      <button class="save-btn" onclick="saveWord()">Save Word</button>
-    </div>
-  </div>
-</div>
-
-<!-- DELETE CONFIRM -->
-<div class="confirm-overlay hidden" id="confirm-overlay">
-  <div class="confirm-box">
-    <h3>Remove this word?</h3>
-    <p id="confirm-msg"></p>
-    <div class="confirm-actions">
-      <button class="confirm-no" onclick="closeConfirm()">Keep it</button>
-      <button class="confirm-yes" onclick="confirmDelete()">Remove</button>
+    <div class="full">
+      <label>Etymology</label>
+      <textarea
+        id="etymologyInput"
+        placeholder="Derived from..."
+      ></textarea>
     </div>
   </div>
-</div>
-
-<script>
-const STORAGE_KEY = 'word-library-v1';
-const SAMPLE = [
-  { id: 's1', word: 'Petrichor', explanation: 'The pleasant, earthy smell that follows rain falling on dry earth.', synonyms: 'earthy scent, rain smell, pluvial aroma', addedAt: '2024-03-12T00:00:00Z' },
-  { id: 's2', word: 'Sonder', explanation: 'The realization that each passerby has a life as vivid and complex as your own.', synonyms: 'empathy, awareness, existential wonder', addedAt: '2024-04-01T00:00:00Z' },
-  { id: 's3', word: 'Vellichor', explanation: 'The strange wistfulness of used bookshops, which are somehow both cozy and melancholy at once.', synonyms: 'nostalgia, wistfulness, antiquarian feeling', addedAt: '2024-05-22T00:00:00Z' },
-];
-
-let entries = [];
-let expandedId = null;
-let deleteTargetId = null;
-let justAddedId = null;
-
-function load() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    entries = raw ? JSON.parse(raw) : [...SAMPLE];
-    if (!raw) save();
-  } catch { entries = [...SAMPLE]; }
-  renderAll();
-}
-
-function save() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(entries)); } catch {}
-}
-
-function genId() { return Math.random().toString(36).slice(2) + Date.now().toString(36); }
-
-function getFiltered() {
-  const q = document.getElementById('search-input').value.trim().toLowerCase();
-  if (!q) return entries;
-  return entries.filter(e =>
-    e.word.toLowerCase().includes(q) ||
-    e.explanation.toLowerCase().includes(q) ||
-    e.synonyms.toLowerCase().includes(q)
-  );
-}
-
-function groupByLetter(list) {
-  const g = {};
-  for (const e of list) {
-    const l = e.word[0].toUpperCase();
-    if (!g[l]) g[l] = [];
-    g[l].push(e);
-  }
-  return g;
-}
-
-function renderAll() {
-  const filtered = getFiltered();
-  const grouped = groupByLetter(filtered);
-  const letters = Object.keys(grouped).sort();
-  const allLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-  const allGrouped = groupByLetter(entries);
-
-  // Alpha bar
-  const bar = document.getElementById('alpha-bar');
-  bar.innerHTML = allLetters.map(l => {
-    const has = !!allGrouped[l];
-    return `<a class="alpha-lnk ${has ? 'has-entries' : 'no-entries'}" onclick="${has ? `scrollTo('letter-${l}')` : ''}">${l}</a>`;
-  }).join('');
-
-  // Count
-  const q = document.getElementById('search-input').value.trim();
-  const countEl = document.getElementById('count-label');
-  countEl.textContent = filtered.length === 0 ? '' :
-    `${filtered.length} ${filtered.length === 1 ? 'entry' : 'entries'}${q ? ` matching "${q}"` : ''}`;
-
-  // List
-  const list = document.getElementById('word-list');
-  if (filtered.length === 0) {
-    const q2 = document.getElementById('search-input').value.trim();
-    list.innerHTML = `<div class="empty">${q2 ? `No words matching "${q2}"` : 'Your library is empty — add your first word!'}</div>`;
-    return;
-  }
-
-  list.innerHTML = letters.map(letter => `
-    <div class="letter-group" id="letter-${letter}">
-      <div class="letter-heading">${letter}</div>
-      ${grouped[letter].map(e => renderCard(e)).join('')}
-    </div>
-  `).join('');
-}
-
-function renderCard(e) {
-  const isOpen = expandedId === e.id;
-  const isNew = justAddedId === e.id;
-  const date = new Date(e.addedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-  return `
-    <div class="card${isNew ? ' just-added' : ''}" id="card-${e.id}">
-      <div class="card-header" onclick="toggleCard('${e.id}')">
-        <span class="card-word">${e.word}</span>
-        <span class="card-date">${date}</span>
-        <span class="card-chevron${isOpen ? ' open' : ''}">▼</span>
-      </div>
-      ${isOpen ? `
-      <div class="card-body">
-        <div class="card-label">Explanation</div>
-        <div class="card-explanation">${e.explanation}</div>
-        ${e.synonyms ? `<div class="card-label">Synonyms</div><div class="card-synonyms">${e.synonyms}</div>` : ''}
-        <div class="card-actions">
-          <button class="del-btn" onclick="askDelete('${e.id}')">Remove</button>
-        </div>
-      </div>` : ''}
-    </div>`;
-}
-
-function toggleCard(id) {
-  expandedId = expandedId === id ? null : id;
-  renderAll();
-}
-
-function scrollTo(id) {
-  const el = document.getElementById(id);
-  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-function openForm() {
-  document.getElementById('f-word').value = '';
-  document.getElementById('f-explanation').value = '';
-  document.getElementById('f-synonyms').value = '';
-  clearErr('err-word'); clearErr('err-explanation');
-  document.getElementById('form-overlay').classList.remove('hidden');
-  setTimeout(() => document.getElementById('f-word').focus(), 100);
-}
-
-function closeForm() { document.getElementById('form-overlay').classList.add('hidden'); }
-
-function overlayClick(e) { if (e.target === e.currentTarget) closeForm(); }
-
-function clearErr(id) {
-  const el = document.getElementById(id);
-  el.classList.add('hidden'); el.textContent = '';
-  const inputId = id === 'err-word' ? 'f-word' : 'f-explanation';
-  document.getElementById(inputId).classList.remove('error');
-}
-
-function showErr(id, msg) {
-  const el = document.getElementById(id);
-  el.textContent = msg; el.classList.remove('hidden');
-  const inputId = id === 'err-word' ? 'f-word' : 'f-explanation';
-  document.getElementById(inputId).classList.add('error');
-}
-
-function saveWord() {
-  const word = document.getElementById('f-word').value.trim();
-  const explanation = document.getElementById('f-explanation').value.trim();
-  const synonyms = document.getElementById('f-synonyms').value.trim();
-  let ok = true;
-  if (!word) { showErr('err-word', 'A word is required.'); ok = false; }
-  else if (entries.find(e => e.word.toLowerCase() === word.toLowerCase())) {
-    showErr('err-word', 'This word is already in your library.'); ok = false;
-  }
-  if (!explanation) { showErr('err-explanation', 'An explanation is required.'); ok = false; }
-  if (!ok) return;
-  const entry = { id: genId(), word, explanation, synonyms, addedAt: new Date().toISOString() };
-  entries = [...entries, entry].sort((a, b) => a.word.localeCompare(b.word, undefined, { sensitivity: 'base' }));
-  save();
-  justAddedId = entry.id;
-  expandedId = entry.id;
-  setTimeout(() => { justAddedId = null; renderAll(); }, 1800);
-  closeForm();
-  document.getElementById('search-input').value = '';
-  renderAll();
-  setTimeout(() => {
-    const el = document.getElementById('card-' + entry.id);
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }, 100);
-}
-
-function askDelete(id) {
-  deleteTargetId = id;
-  const e = entries.find(x => x.id === id);
-  document.getElementById('confirm-msg').textContent = `"${e.word}" will be removed from your library.`;
-  document.getElementById('confirm-overlay').classList.remove('hidden');
-}
-
-function closeConfirm() {
-  deleteTargetId = null;
-  document.getElementById('confirm-overlay').classList.add('hidden');
-}
-
-function confirmDelete() {
-  entries = entries.filter(e => e.id !== deleteTargetId);
-  if (expandedId === deleteTargetId) expandedId = null;
-  save(); closeConfirm(); renderAll();
-}
-
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { closeForm(); closeConfirm(); }
-});
-
-load();
-</script>
+  <button class="submit-btn" onclick="addEntry()">
+    Add To Archive
+  </button>
+</section>
+<!-- LIBRARY -->
+<section>
+  <div class="library-header">
+    <h2>Archive</h2>
+    <p>
+      Browse the collection alphabetically.
+    </p>
+  </div>
+  <div id="library"></div>
+</section>
+  </div>
+  <script>
+    // ---------------- STORAGE ----------------
+    const STORAGE_KEY = "forgottenLexiconEntries";
+    // ---------------- DEFAULT ENTRIES ----------------
+    const defaultEntries = [
+      {
+        word:"Wasenmeister",
+        meaning:"Historical occupation involving the disposal and processing of animal carcasses. Often associated with executioners and socially marginalized labor.",
+        etymology:"From German 'Wasen' relating to turf or carcass disposal grounds combined with 'Meister' meaning master.",
+        synonyms:"knackerman, executioner, carcass collector"
+      },
+      {
+        word:"Weltschmerz",
+        meaning:"A feeling of melancholy or world-weariness caused by the imperfect nature of reality.",
+        etymology:"German compound of 'Welt' (world) and 'Schmerz' (pain).",
+        synonyms:"existential sorrow, melancholy"
+      },
+      {
+        word:"Nachtmahr",
+        meaning:"A nightmare spirit from Germanic folklore associated with oppressive dreams.",
+        etymology:"Derived from Old High German roots relating to night demons.",
+        synonyms:"nightmare spirit, incubus"
+      }
+    ];
+    // ---------------- LOAD ENTRIES ----------------
+    let entries = JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultEntries;
+    // ---------------- SAVE ----------------
+    function saveEntries(){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+    }
+    // ---------------- ADD ENTRY ----------------
+    function addEntry(){
+      const word = document.getElementById("wordInput").value.trim();
+      const meaning = document.getElementById("meaningInput").value.trim();
+      const etymology = document.getElementById("etymologyInput").value.trim();
+      const synonyms = document.getElementById("synonymsInput").value.trim();
+      if(!word){
+        alert("Please enter a word.");
+        return;
+      }
+      entries.push({
+        word,
+        meaning,
+        etymology,
+        synonyms
+      });
+      saveEntries();
+      renderLibrary();
+      // CLEAR FORM
+      document.getElementById("wordInput").value = "";
+      document.getElementById("meaningInput").value = "";
+      document.getElementById("etymologyInput").value = "";
+      document.getElementById("synonymsInput").value = "";
+    }
+    // ---------------- DELETE ENTRY ----------------
+    function deleteEntry(index){
+      const confirmDelete = confirm("Delete this entry?");
+      if(!confirmDelete) return;
+      entries.splice(index, 1);
+      saveEntries();
+      renderLibrary();
+    }
+    // ---------------- SEARCH ----------------
+    document.getElementById("searchInput").addEventListener("input", renderLibrary);
+    // ---------------- RENDER ----------------
+    function renderLibrary(){
+      const library = document.getElementById("library");
+      const searchTerm = document
+        .getElementById("searchInput")
+        .value
+        .toLowerCase();
+      // SORT
+      entries.sort((a,b) =>
+        a.word.localeCompare(b.word)
+      );
+      // FILTER
+      const filtered = entries.filter(entry => {
+        return (
+          entry.word.toLowerCase().includes(searchTerm) ||
+          entry.meaning.toLowerCase().includes(searchTerm) ||
+          entry.etymology.toLowerCase().includes(searchTerm) ||
+          entry.synonyms.toLowerCase().includes(searchTerm)
+        );
+      });
+      // GROUP
+      const grouped = {};
+      filtered.forEach(entry => {
+        const letter = entry.word[0].toUpperCase();
+        if(!grouped[letter]){
+          grouped[letter] = [];
+        }
+        grouped[letter].push(entry);
+      });
+      library.innerHTML = "";
+      // EMPTY STATE
+      if(filtered.length === 0){
+        library.innerHTML = `
+          <div class="empty">
+            No matching entries found.
+          </div>
+        `;
+        return;
+      }
+      // RENDER LETTERS
+      Object.keys(grouped).forEach(letter => {
+        const section = document.createElement("div");
+        section.classList.add("letter-section");
+        section.id = "section-" + letter;
+        section.innerHTML = `
+          <div class="letter">${letter}</div>
+        `;
+        grouped[letter].forEach(entry => {
+          const originalIndex = entries.indexOf(entry);
+          const card = document.createElement("div");
+          card.classList.add("word-card");
+          card.innerHTML = `
+            <div class="word-title">
+              ${entry.word}
+            </div>
+            <div class="word-details">
+              <div>
+                <div class="meta-title">Meaning</div>
+                <p>${entry.meaning}</p>
+              </div>
+              <div>
+                <div class="meta-title">Etymology</div>
+                <p>${entry.etymology}</p>
+              </div>
+              <div>
+                <div class="meta-title">Synonyms</div>
+                <p class="synonyms">${entry.synonyms}</p>
+              </div>
+            </div>
+            <button
+              class="delete-btn"
+              onclick="deleteEntry(${originalIndex})"
+            >
+              ×
+            </button>
+          `;
+          section.appendChild(card);
+        });
+        library.appendChild(section);
+      });
+      renderAlphabetNav(grouped);
+    }
+    // ---------------- ALPHABET NAV ----------------
+    function renderAlphabetNav(grouped){
+      const nav = document.getElementById("alphabetNav");
+      nav.innerHTML = "";
+      Object.keys(grouped).forEach(letter => {
+        const link = document.createElement("a");
+        link.href = "#section-" + letter;
+        link.innerText = letter;
+        nav.appendChild(link);
+      });
+    }
+    // ---------------- INIT ----------------
+    renderLibrary();
+  </script>
 </body>
 </html>
