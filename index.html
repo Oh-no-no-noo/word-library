@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sélène's Archive</title>
@@ -194,6 +195,10 @@
   </div>
 
   <script>
+    const supabaseUrl = "https://mtrgsmiifzeptzulaqvd.supabase.co";
+    const supabaseKey = "sb_publishable_OXa-ZMEtbaYmZCmy1tE4bA__AO5NpfQ";
+
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
     const STORAGE_KEY = "sélène'sArchiveEntries";
     const defaultEntries = [
       {
